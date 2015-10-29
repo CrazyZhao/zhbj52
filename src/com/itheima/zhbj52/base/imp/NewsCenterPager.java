@@ -30,6 +30,9 @@ public class NewsCenterPager extends BasePager {
 		enableSlidingMenu(true);
 		// 向FrameLayout中动态添加布局
 		subContent.addView(text);
+		
+		
+		
 	}
 
 }
