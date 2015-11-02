@@ -20,6 +20,8 @@ import com.itheima.zhbj52.base.menudetail.PhotoMenuDetailPager;
 import com.itheima.zhbj52.base.menudetail.TopicMenuDetailPager;
 import com.itheima.zhbj52.domain.NewsData;
 import com.itheima.zhbj52.domain.NewsData.NewsMenuData;
+import com.itheima.zhbj52.utils.PrefUtils;
+import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.lidroid.xutils.ViewUtils;
 import com.lidroid.xutils.view.annotation.ViewInject;
 
@@ -48,8 +50,20 @@ public class LeftMenuFragment extends BaseFragment {
 				menuAdapter.notifyDataSetChanged(); // 适配器的内容改变时会强制调用getView来刷新每个Item的内容
 
 				setCurrentMenuDetailPager(position);
+				
+				toggleSlidingMenu();
 			}
 		});
+	}
+
+	/**
+	 * 切换SlidingMenu的状态
+	 */
+	protected void toggleSlidingMenu() {
+		MainActivity mainUi = (MainActivity) mActivity;
+		SlidingMenu slidingMenu = mainUi.getSlidingMenu();
+		slidingMenu.toggle();// Toggle the SlidingMenu. If it is open, it will
+								// be closed, and vice versa.
 	}
 
 	/**

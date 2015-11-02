@@ -1,8 +1,8 @@
 package com.itheima.zhbj52.base;
 
 import android.app.Activity;
-import android.text.method.Touch;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -43,6 +43,24 @@ public class BasePager {
 		subContent = (FrameLayout) mRootView.findViewById(R.id.sub_content);
 		btnMenu = (ImageButton) mRootView.findViewById(R.id.btn_menu);
 
+		btnMenu.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				toggleSlidingMenu();
+			}
+		});
+
+	}
+
+	/**
+	 * 切换SlidingMenu的状态
+	 */
+	protected void toggleSlidingMenu() {
+		MainActivity mainUi = (MainActivity) mActivity;
+		SlidingMenu slidingMenu = mainUi.getSlidingMenu();
+		slidingMenu.toggle();// Toggle the SlidingMenu. If it is open, it will
+								// be closed, and vice versa.
 	}
 
 	/**

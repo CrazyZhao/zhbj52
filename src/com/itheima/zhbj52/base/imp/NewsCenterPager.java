@@ -19,6 +19,7 @@ import com.itheima.zhbj52.base.menudetail.TopicMenuDetailPager;
 import com.itheima.zhbj52.domain.NewsData;
 import com.itheima.zhbj52.fragment.LeftMenuFragment;
 import com.itheima.zhbj52.global.GlobalConstants;
+import com.itheima.zhbj52.utils.PrefUtils;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.ResponseInfo;
@@ -34,6 +35,7 @@ import com.lidroid.xutils.http.client.HttpRequest.HttpMethod;
 public class NewsCenterPager extends BasePager {
 
 	public ArrayList<BaseMenuDetailPager> mPagers; // 四个菜单详情页
+	private NewsData mNewsData;
 
 	public NewsCenterPager(Activity activity) {
 		super(activity);
@@ -41,15 +43,15 @@ public class NewsCenterPager extends BasePager {
 
 	@Override
 	public void initData() {
-		tvTitle.setText("智慧北京");
-		TextView text = new TextView(mActivity);
-		text.setText("新闻中心");
-		text.setTextColor(Color.RED);
-		text.setTextSize(25);
-		text.setGravity(Gravity.CENTER);
+		tvTitle.setText("新闻");
+		/*
+		 * TextView text = new TextView(mActivity); text.setText("新闻中心");
+		 * text.setTextColor(Color.RED); text.setTextSize(25);
+		 * text.setGravity(Gravity.CENTER);
+		 */
 		enableSlidingMenu(true);
 		// 向FrameLayout中动态添加布局
-		subContent.addView(text);
+		// subContent.addView(text);
 
 		getServerData();
 
@@ -90,12 +92,12 @@ public class NewsCenterPager extends BasePager {
 	protected void parseData(String result) {
 
 		Gson gson = new Gson();
-		NewsData data = gson.fromJson(result, NewsData.class);
-		System.out.println("解析结果:" + data);
+		mNewsData = gson.fromJson(result, NewsData.class);
+		System.out.println("解析结果:" + mNewsData);
 		// 设置侧边栏数据
 		LeftMenuFragment fragment = ((MainActivity) mActivity)
 				.getLeftMenuFragment();
-		fragment.setMenuData(data);
+		fragment.setMenuData(mNewsData);
 
 		// 准备4个菜单详情页
 		mPagers = new ArrayList<BaseMenuDetailPager>();
@@ -113,5 +115,7 @@ public class NewsCenterPager extends BasePager {
 		BaseMenuDetailPager pager = mPagers.get(position);// 获取当前要显示的菜单详情页
 		subContent.removeAllViews(); // 清除之前的布局
 		subContent.addView(pager.mRootView);// 将菜单详情页设置给内容帧布局
+
+		tvTitle.setText(mNewsData.data.get(position).title);
 	}
 }

@@ -25,4 +25,16 @@ public class PrefUtils {
 				Context.MODE_PRIVATE);
 		sp.edit().putBoolean(key, value).commit();
 	}
+
+	public static int getInt(Context ctx, String key, int defaultValue) {
+		SharedPreferences sp = ctx.getSharedPreferences(PREF_NAME,
+				Context.MODE_PRIVATE);
+		return sp.getInt(key, defaultValue);
+	}
+
+	public static void setInt(Context ctx, String key, int value) {
+		SharedPreferences sp = ctx.getSharedPreferences(PREF_NAME,
+				Context.MODE_PRIVATE);
+		sp.edit().putInt(key, value).commit();
+	}
 }
