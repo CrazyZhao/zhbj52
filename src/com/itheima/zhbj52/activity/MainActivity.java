@@ -7,6 +7,7 @@ import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import com.jeremyfeinstein.slidingmenu.lib.app.SlidingFragmentActivity;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Window;
@@ -15,6 +16,7 @@ public class MainActivity extends SlidingFragmentActivity {
 
 	private static final String FRAGMENT_LEFT_MENU = "fragment_left_menu";
 	private static final String FRAGMENT_CONTENT = "fragment_content";
+	private FragmentManager fragmentManager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -35,12 +37,30 @@ public class MainActivity extends SlidingFragmentActivity {
 	 * 初始化Fragment，将fragment数据填充给布局文件
 	 */
 	private void initFragment() {
-		FragmentManager fragmentManager = getSupportFragmentManager();
+		fragmentManager = getSupportFragmentManager();
 		FragmentTransaction transaction = fragmentManager.beginTransaction();
 		transaction.replace(R.id.fl_left_menu, new LeftMenuFragment(),
 				FRAGMENT_LEFT_MENU);
 		transaction.replace(R.id.fl_content, new ContentFragment(),
 				FRAGMENT_CONTENT);
 		transaction.commit();
+	}
+
+	/*
+	 * 获取侧边栏
+	 */
+	public LeftMenuFragment getLeftMenuFragment() {
+		LeftMenuFragment fragment = (LeftMenuFragment) fragmentManager
+				.findFragmentByTag(FRAGMENT_LEFT_MENU);
+		return fragment;
+	}
+
+	/**
+	 * 获取内容fragment
+	 */
+	public ContentFragment getContentFragment() {
+		ContentFragment fragment = (ContentFragment) fragmentManager
+				.findFragmentByTag(FRAGMENT_CONTENT);
+		return fragment;
 	}
 }
