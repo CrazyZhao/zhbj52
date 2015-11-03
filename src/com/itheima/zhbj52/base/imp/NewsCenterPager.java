@@ -43,7 +43,7 @@ public class NewsCenterPager extends BasePager {
 
 	@Override
 	public void initData() {
-		tvTitle.setText("新闻");
+		// tvTitle.setText("新闻");
 		/*
 		 * TextView text = new TextView(mActivity); text.setText("新闻中心");
 		 * text.setTextColor(Color.RED); text.setTextSize(25);
@@ -101,10 +101,13 @@ public class NewsCenterPager extends BasePager {
 
 		// 准备4个菜单详情页
 		mPagers = new ArrayList<BaseMenuDetailPager>();
-		mPagers.add(new NewsMenuDetailPager(mActivity));
+		mPagers.add(new NewsMenuDetailPager(mActivity,
+				mNewsData.data.get(0).children));
 		mPagers.add(new TopicMenuDetailPager(mActivity));
 		mPagers.add(new PhotoMenuDetailPager(mActivity));
 		mPagers.add(new InteractMenuDetailPager(mActivity));
+
+		setCurrentMenuDetailPager(0); // 设置菜单详情页-新闻为默认当前页
 
 	}
 
@@ -117,5 +120,7 @@ public class NewsCenterPager extends BasePager {
 		subContent.addView(pager.mRootView);// 将菜单详情页设置给内容帧布局
 
 		tvTitle.setText(mNewsData.data.get(position).title);
+
+		pager.initData(); // 初始化当前页面的数据
 	}
 }

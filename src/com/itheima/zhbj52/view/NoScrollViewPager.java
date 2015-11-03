@@ -7,17 +7,23 @@ import android.view.MotionEvent;
 
 /**
  * 自定义禁止滑动的ViewPager
+ * 
  * @author baoliang.zhao
- *
+ * 
  */
 public class NoScrollViewPager extends ViewPager {
 
 	public NoScrollViewPager(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
-	
+
 	public NoScrollViewPager(Context context) {
 		super(context);
+	}
+
+	@Override
+	public boolean onInterceptTouchEvent(MotionEvent ev) {
+		return false;
 	}
 
 	@Override
