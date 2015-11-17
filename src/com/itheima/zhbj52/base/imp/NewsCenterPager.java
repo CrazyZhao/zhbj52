@@ -65,7 +65,7 @@ public class NewsCenterPager extends BasePager {
 		HttpUtils utils = new HttpUtils();
 		utils.send(HttpMethod.GET, GlobalConstants.CATEGORIES_URL,
 				new RequestCallBack<String>() {
-
+					//访问成功,在主线程中运行
 					@Override
 					public void onSuccess(ResponseInfo<String> responseInfo) {
 						String result = responseInfo.result;
