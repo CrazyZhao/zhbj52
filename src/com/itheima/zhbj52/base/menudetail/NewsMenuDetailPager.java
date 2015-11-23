@@ -1,5 +1,6 @@
 package com.itheima.zhbj52.base.menudetail;
 
+import java.io.UTFDataFormatException;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -13,6 +14,9 @@ import com.itheima.zhbj52.base.BaseMenuDetailPager;
 import com.itheima.zhbj52.base.TabDetailPager;
 import com.itheima.zhbj52.domain.NewsData;
 import com.itheima.zhbj52.domain.NewsData.NewsMenuData.NewsTabData;
+import com.lidroid.xutils.ViewUtils;
+import com.lidroid.xutils.view.annotation.event.OnClick;
+import com.viewpagerindicator.TabPageIndicator;
 
 /**
  * 菜单详情页-新闻
@@ -28,6 +32,8 @@ public class NewsMenuDetailPager extends BaseMenuDetailPager {
 
 	private ArrayList<TabDetailPager> mPagerList;
 
+	private TabPageIndicator mIndicator;
+
 	public NewsMenuDetailPager(Activity mActivity,
 			ArrayList<NewsTabData> children) {
 		super(mActivity);
@@ -37,7 +43,12 @@ public class NewsMenuDetailPager extends BaseMenuDetailPager {
 	@Override
 	public View initView() {
 		View view = View.inflate(mActivity, R.layout.news_menu_detail, null);
+		//用注解时需要注入当前对象
+		ViewUtils.inject(this, view);
+
 		mViewPager = (ViewPager) view.findViewById(R.id.vp_menu_detail);
+		// 初始化自定义控件：TabPageIndicator
+		mIndicator = (TabPageIndicator) view.findViewById(R.id.indicator);
 
 		return view;
 	}
@@ -51,9 +62,22 @@ public class NewsMenuDetailPager extends BaseMenuDetailPager {
 		}
 
 		mViewPager.setAdapter(new MenuDetailAdapter());
+		mIndicator.setViewPager(mViewPager); // 必须在ViewPager setAdapter之后才能调用
+	}
+
+	// 跳转到下一个页面
+	@OnClick(R.id.btn_next)
+	public void nextPage(View view) {
+		int currentItem = mViewPager.getCurrentItem();
+		mViewPager.setCurrentItem(++currentItem);
 	}
 
 	class MenuDetailAdapter extends PagerAdapter {
+
+		@Override
+		public CharSequence getPageTitle(int position) {
+			return mNewsTabData.get(position).title;
+		}
 
 		@Override
 		public int getCount() {
