@@ -61,8 +61,12 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 	@Override
 	public View initView() {
 		View view = View.inflate(mActivity, R.layout.tab_detail_pager, null);
+		//加载头布局
+		View headerView = View.inflate(mActivity, R.layout.list_header_topnews, null);
 		ViewUtils.inject(this, view);
-
+		ViewUtils.inject(this, headerView);
+		//将头条新闻以头布局的形式加给ListView
+		lvList.addHeaderView(headerView);
 		return view;
 	}
 
@@ -154,7 +158,17 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 		}
 	}
 
+	/**
+	 * 新闻列表适配器
+	 * @author baoliang.zhao
+	 *
+	 */
 	class NewsAdapter extends BaseAdapter {
+		private BitmapUtils utils;
+		public NewsAdapter(){
+			utils = new BitmapUtils(mActivity);
+			utils.configDefaultLoadingImage(R.drawable.pic_item_list_default);
+		}
 
 		@Override
 		public int getCount() {
@@ -173,12 +187,30 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder viewHolder;
 			if (convertView == null) {
-				
+				convertView = View.inflate(mActivity, R.layout.list_news_item, null);
+				viewHolder = new ViewHolder();
+				viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tv_title);
+				viewHolder.tvDate = (TextView) convertView.findViewById(R.id.tv_date);
+				viewHolder.ivPic = (ImageView) convertView.findViewById(R.id.iv_pic);
+				convertView.setTag(viewHolder);
+			}else{
+				viewHolder = (ViewHolder) convertView.getTag();
 			}
-			return null;
+			TabNewsData item = getItem(position);
+			viewHolder.tvTitle.setText(item.title);
+			viewHolder.tvDate.setText(item.pubdate);
+			utils.display(viewHolder.ivPic, item.listimage);
+			return convertView;
 		}
 
+	}
+	
+	static class ViewHolder {
+		public TextView tvTitle;
+		public TextView tvDate;
+		public ImageView ivPic;
 	}
 
 	@Override
