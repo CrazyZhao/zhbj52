@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +21,7 @@ import com.itheima.zhbj52.domain.TabData;
 import com.itheima.zhbj52.domain.TabData.TabNewsData;
 import com.itheima.zhbj52.domain.TabData.TopNewsData;
 import com.itheima.zhbj52.global.GlobalConstants;
+import com.itheima.zhbj52.view.RefreshListView;
 import com.lidroid.xutils.BitmapUtils;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.ViewUtils;
@@ -46,7 +46,7 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 	@ViewInject(R.id.indicator)
 	private CirclePageIndicator mIndicator; // 头条新闻指示器
 	@ViewInject(R.id.lv_list)
-	private ListView lvList; // 新闻列表
+	private RefreshListView lvList; // 新闻列表
 
 	private ArrayList<TopNewsData> mTopNewsList;// 头条新闻数据集合
 	private ArrayList<TabNewsData> mTabNewsList; // 新闻列表数据集合
