@@ -8,9 +8,9 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +22,7 @@ import com.itheima.zhbj52.domain.TabData.TabNewsData;
 import com.itheima.zhbj52.domain.TabData.TopNewsData;
 import com.itheima.zhbj52.global.GlobalConstants;
 import com.itheima.zhbj52.view.RefreshListView;
+import com.itheima.zhbj52.view.RefreshListView.OnRefreshListener;
 import com.lidroid.xutils.BitmapUtils;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.ViewUtils;
@@ -61,12 +62,23 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 	@Override
 	public View initView() {
 		View view = View.inflate(mActivity, R.layout.tab_detail_pager, null);
-		//加载头布局
-		View headerView = View.inflate(mActivity, R.layout.list_header_topnews, null);
+		// 加载头布局
+		View headerView = View.inflate(mActivity, R.layout.list_header_topnews,
+				null);
 		ViewUtils.inject(this, view);
 		ViewUtils.inject(this, headerView);
-		//将头条新闻以头布局的形式加给ListView
+		// 将头条新闻以头布局的形式加给ListView
 		lvList.addHeaderView(headerView);
+
+		// 设置下拉刷新监听
+		lvList.setOnRefreshListener(new OnRefreshListener() {
+
+			@Override
+			public void onRefresh() {
+				getDataFromServer();
+			}
+		});
+
 		return view;
 	}
 
@@ -84,12 +96,14 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 				String result = responseInfo.result;
 				System.out.println("页签详情页返回结果：" + result);
 				parseData(result);
+				lvList.onRefreshComplete(true);
 			}
 
 			@Override
 			public void onFailure(HttpException error, String msg) {
 				Toast.makeText(mActivity, msg, Toast.LENGTH_SHORT).show();
 				error.printStackTrace();
+				lvList.onRefreshComplete(false);
 			}
 		});
 	}
@@ -160,12 +174,14 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 
 	/**
 	 * 新闻列表适配器
+	 * 
 	 * @author baoliang.zhao
-	 *
+	 * 
 	 */
 	class NewsAdapter extends BaseAdapter {
 		private BitmapUtils utils;
-		public NewsAdapter(){
+
+		public NewsAdapter() {
 			utils = new BitmapUtils(mActivity);
 			utils.configDefaultLoadingImage(R.drawable.pic_item_list_default);
 		}
@@ -189,13 +205,17 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 		public View getView(int position, View convertView, ViewGroup parent) {
 			ViewHolder viewHolder;
 			if (convertView == null) {
-				convertView = View.inflate(mActivity, R.layout.list_news_item, null);
+				convertView = View.inflate(mActivity, R.layout.list_news_item,
+						null);
 				viewHolder = new ViewHolder();
-				viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.tv_title);
-				viewHolder.tvDate = (TextView) convertView.findViewById(R.id.tv_date);
-				viewHolder.ivPic = (ImageView) convertView.findViewById(R.id.iv_pic);
+				viewHolder.tvTitle = (TextView) convertView
+						.findViewById(R.id.tv_title);
+				viewHolder.tvDate = (TextView) convertView
+						.findViewById(R.id.tv_date);
+				viewHolder.ivPic = (ImageView) convertView
+						.findViewById(R.id.iv_pic);
 				convertView.setTag(viewHolder);
-			}else{
+			} else {
 				viewHolder = (ViewHolder) convertView.getTag();
 			}
 			TabNewsData item = getItem(position);
@@ -206,7 +226,7 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 		}
 
 	}
-	
+
 	static class ViewHolder {
 		public TextView tvTitle;
 		public TextView tvDate;
