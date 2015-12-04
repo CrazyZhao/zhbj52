@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -52,6 +53,7 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 	private ArrayList<TopNewsData> mTopNewsList;// 头条新闻数据集合
 	private ArrayList<TabNewsData> mTabNewsList; // 新闻列表数据集合
 	private NewsAdapter mNewsAdapter;
+	private String mMoreUrl; // 更多页面的地址
 
 	public TabDetailPager(Activity mActivity, NewsTabData newsTabData) {
 		super(mActivity);
@@ -77,6 +79,17 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 			public void onRefresh() {
 				getDataFromServer();
 			}
+
+			@Override
+			public void onLoadMore() {
+				if (mMoreUrl != null) {
+
+				} else {
+					Toast.makeText(mActivity, "到底啦~", Toast.LENGTH_SHORT)
+							.show();
+					lvList.onRefreshComplete(false);// 收起脚布局
+				}
+			}
 		});
 
 		return view;
@@ -95,7 +108,7 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 			public void onSuccess(ResponseInfo<String> responseInfo) {
 				String result = responseInfo.result;
 				System.out.println("页签详情页返回结果：" + result);
-				parseData(result);
+				parseData(result, false);
 				lvList.onRefreshComplete(true);
 			}
 
@@ -108,9 +121,40 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 		});
 	}
 
-	protected void parseData(String result) {
+	/**
+	 * 加载下一页数据
+	 */
+	private void getMoreDataFromServer() {
+		HttpUtils utils = new HttpUtils();
+		utils.send(HttpMethod.GET, mMoreUrl, new RequestCallBack<String>() {
+
+			@Override
+			public void onSuccess(ResponseInfo<String> responseInfo) {
+				String result = responseInfo.result;
+				System.out.println("页签详情页返回结果：" + result);
+				parseData(result, true);
+				lvList.onRefreshComplete(true);
+			}
+
+			@Override
+			public void onFailure(HttpException error, String msg) {
+				Toast.makeText(mActivity, msg, Toast.LENGTH_SHORT).show();
+				error.printStackTrace();
+				lvList.onRefreshComplete(false);
+			}
+		});
+	}
+
+	protected void parseData(String result, boolean isMore) {
 		Gson gson = new Gson();
 		mTabData = gson.fromJson(result, TabData.class);
+		// 处理下一页的链接
+		String more = mTabData.data.more;
+		if (!TextUtils.isEmpty(more)) {
+			mMoreUrl = GlobalConstants.SERVER_URL + more;
+		} else {
+			mMoreUrl = null;
+		}
 
 		mTopNewsList = mTabData.data.topnews;
 		mTabNewsList = mTabData.data.news;
