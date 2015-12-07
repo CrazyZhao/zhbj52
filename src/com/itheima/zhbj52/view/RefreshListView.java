@@ -11,6 +11,7 @@ import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -24,7 +25,8 @@ import com.itheima.zhbj52.R;
  * @author baoliang.zhao
  * 
  */
-public class RefreshListView extends ListView implements OnScrollListener {
+public class RefreshListView extends ListView implements OnScrollListener,
+		android.widget.AdapterView.OnItemClickListener {
 
 	private static final int STATE_PULL_REFRESH = 0; // 下拉刷新
 	private static final int STATE_RELEASE_REFRESH = 1;// 松开刷新
@@ -259,5 +261,23 @@ public class RefreshListView extends ListView implements OnScrollListener {
 	public void onScroll(AbsListView view, int firstVisibleItem,
 			int visibleItemCount, int totalItemCount) {
 
+	}
+
+	OnItemClickListener mItemClickListener;
+
+	@Override
+	public void setOnItemClickListener(
+			android.widget.AdapterView.OnItemClickListener listener) {
+		super.setOnItemClickListener(this);
+
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position,
+			long id) {
+		if (mItemClickListener != null) {
+			mItemClickListener.onItemClick(parent, view, position
+					- getHeaderViewsCount(), id);
+		}
 	}
 }

@@ -9,6 +9,8 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
@@ -22,6 +24,7 @@ import com.itheima.zhbj52.domain.TabData;
 import com.itheima.zhbj52.domain.TabData.TabNewsData;
 import com.itheima.zhbj52.domain.TabData.TopNewsData;
 import com.itheima.zhbj52.global.GlobalConstants;
+import com.itheima.zhbj52.utils.PrefUtils;
 import com.itheima.zhbj52.view.RefreshListView;
 import com.itheima.zhbj52.view.RefreshListView.OnRefreshListener;
 import com.lidroid.xutils.BitmapUtils;
@@ -83,12 +86,27 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 			@Override
 			public void onLoadMore() {
 				if (mMoreUrl != null) {
-
+					getMoreDataFromServer();
 				} else {
 					Toast.makeText(mActivity, "到底啦~", Toast.LENGTH_SHORT)
 							.show();
 					lvList.onRefreshComplete(false);// 收起脚布局
 				}
+			}
+		});
+
+		lvList.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				System.out.println("被点击：" + position);
+
+				String ids = PrefUtils.getString(mActivity, "read_ids", "");
+				
+				ids = ids + mTabNewsList.get(position).id + ",";
+				PrefUtils.setString(mActivity, "read_ids", ids);
+
 			}
 		});
 
@@ -156,22 +174,28 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 			mMoreUrl = null;
 		}
 
-		mTopNewsList = mTabData.data.topnews;
-		mTabNewsList = mTabData.data.news;
-		if (mTopNewsList != null) {
-			mViewPager.setAdapter(new TopNewsAdapter());
+		if (!isMore) {
+			mTopNewsList = mTabData.data.topnews;
+			mTabNewsList = mTabData.data.news;
+			if (mTopNewsList != null) {
+				mViewPager.setAdapter(new TopNewsAdapter());
 
-			mIndicator.setViewPager(mViewPager);
-			mIndicator.setSnap(true); // 支持快照显示
-			mIndicator.setOnPageChangeListener(this);
+				mIndicator.setViewPager(mViewPager);
+				mIndicator.setSnap(true); // 支持快照显示
+				mIndicator.setOnPageChangeListener(this);
 
-			mIndicator.onPageSelected(0);// 让指示器重新定位到第一个点
+				mIndicator.onPageSelected(0);// 让指示器重新定位到第一个点
 
-			tvTitle.setText(mTopNewsList.get(0).title);
-		}
-		if (mTabNewsList != null) {
-			mNewsAdapter = new NewsAdapter();
-			lvList.setAdapter(mNewsAdapter); // 填充新闻列表
+				tvTitle.setText(mTopNewsList.get(0).title);
+			}
+			if (mTabNewsList != null) {
+				mNewsAdapter = new NewsAdapter();
+				lvList.setAdapter(mNewsAdapter); // 填充新闻列表
+			}
+		} else { // 如果是加载下一页，需要将数据追加给原来的集合
+			ArrayList<TabNewsData> news = mTabData.data.news;
+			mTabNewsList.addAll(news);
+			mNewsAdapter.notifyDataSetChanged();
 		}
 
 	}
