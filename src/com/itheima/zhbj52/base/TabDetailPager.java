@@ -2,7 +2,10 @@ package com.itheima.zhbj52.base;
 
 import java.util.ArrayList;
 
+import android.R.color;
 import android.app.Activity;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -27,6 +30,7 @@ import com.itheima.zhbj52.global.GlobalConstants;
 import com.itheima.zhbj52.utils.PrefUtils;
 import com.itheima.zhbj52.view.RefreshListView;
 import com.itheima.zhbj52.view.RefreshListView.OnRefreshListener;
+import com.itheima.zhbj52.view.TopNewsViewPager;
 import com.lidroid.xutils.BitmapUtils;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.ViewUtils;
@@ -45,7 +49,7 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 	private TabData mTabData;
 
 	@ViewInject(R.id.vp_news)
-	private ViewPager mViewPager;
+	private TopNewsViewPager mViewPager;
 	@ViewInject(R.id.tv_title)
 	private TextView tvTitle; // 头条新闻标题
 	@ViewInject(R.id.indicator)
@@ -57,6 +61,7 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 	private ArrayList<TabNewsData> mTabNewsList; // 新闻列表数据集合
 	private NewsAdapter mNewsAdapter;
 	private String mMoreUrl; // 更多页面的地址
+	private TopNewsAdapter mTopNewsAdapter;
 
 	public TabDetailPager(Activity mActivity, NewsTabData newsTabData) {
 		super(mActivity);
@@ -103,14 +108,27 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 				System.out.println("被点击：" + position);
 
 				String ids = PrefUtils.getString(mActivity, "read_ids", "");
-				
-				ids = ids + mTabNewsList.get(position).id + ",";
-				PrefUtils.setString(mActivity, "read_ids", ids);
+				String readId = mTabNewsList.get(position).id;
+				if (!ids.contains(readId)) {
+					ids = ids + readId + ",";
+					PrefUtils.setString(mActivity, "read_ids", ids);
+				}
+
+				// mNewsAdapter.notifyDataSetChanged();
+				changeReadState(view); // 实现局部见面刷新
 
 			}
 		});
 
 		return view;
+	}
+
+	/**
+	 * 改变已读新闻颜色
+	 */
+	public void changeReadState(View view) {
+		TextView tvTitle = (TextView) view.findViewById(R.id.tv_title);
+		tvTitle.setTextColor(Color.GRAY);
 	}
 
 	@Override
@@ -178,7 +196,8 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 			mTopNewsList = mTabData.data.topnews;
 			mTabNewsList = mTabData.data.news;
 			if (mTopNewsList != null) {
-				mViewPager.setAdapter(new TopNewsAdapter());
+				mTopNewsAdapter = new TopNewsAdapter();
+				mViewPager.setAdapter(mTopNewsAdapter);
 
 				mIndicator.setViewPager(mViewPager);
 				mIndicator.setSnap(true); // 支持快照显示
@@ -196,6 +215,7 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 			ArrayList<TabNewsData> news = mTabData.data.news;
 			mTabNewsList.addAll(news);
 			mNewsAdapter.notifyDataSetChanged();
+			mTopNewsAdapter.notifyDataSetChanged(); //必须同时更新头布局！
 		}
 
 	}
@@ -226,7 +246,6 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 		@Override
 		public Object instantiateItem(ViewGroup container, int position) {
 			ImageView mImage = new ImageView(mActivity);
-			;
 			mImage.setScaleType(ScaleType.FIT_XY); // 基于控件大小填充图片
 			TopNewsData topNewsData = mTopNewsList.get(position);
 			bitmapUtils.display(mImage, topNewsData.topimage); // 传入imageView对象和图片地址
@@ -290,6 +309,14 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 			viewHolder.tvTitle.setText(item.title);
 			viewHolder.tvDate.setText(item.pubdate);
 			utils.display(viewHolder.ivPic, item.listimage);
+
+			String ids = PrefUtils.getString(mActivity, "read_ids", "");
+			if (ids.contains(item.id)) {
+				viewHolder.tvTitle.setTextColor(Color.GRAY);
+			} else {
+				viewHolder.tvTitle.setTextColor(Color.BLACK);
+			}
+
 			return convertView;
 		}
 

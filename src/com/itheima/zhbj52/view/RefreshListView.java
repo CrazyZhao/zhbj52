@@ -269,7 +269,7 @@ public class RefreshListView extends ListView implements OnScrollListener,
 	public void setOnItemClickListener(
 			android.widget.AdapterView.OnItemClickListener listener) {
 		super.setOnItemClickListener(this);
-
+		mItemClickListener = listener;
 	}
 
 	@Override
