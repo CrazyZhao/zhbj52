@@ -2,12 +2,10 @@ package com.itheima.zhbj52.base;
 
 import java.util.ArrayList;
 
-import android.R.color;
 import android.app.Activity;
-import android.content.res.ColorStateList;
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
 import android.view.View;
@@ -22,6 +20,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.itheima.zhbj52.R;
+import com.itheima.zhbj52.activity.NewsDetailActivity;
 import com.itheima.zhbj52.domain.NewsData.NewsMenuData.NewsTabData;
 import com.itheima.zhbj52.domain.TabData;
 import com.itheima.zhbj52.domain.TabData.TabNewsData;
@@ -113,9 +112,13 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 					ids = ids + readId + ",";
 					PrefUtils.setString(mActivity, "read_ids", ids);
 				}
-
 				// mNewsAdapter.notifyDataSetChanged();
 				changeReadState(view); // 实现局部见面刷新
+				// 跳转新闻详情页
+				Intent intent = new Intent();
+				intent.setClass(mActivity, NewsDetailActivity.class);
+				intent.putExtra("url", mTabNewsList.get(position).url);
+				mActivity.startActivity(intent);
 
 			}
 		});
@@ -215,7 +218,7 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 			ArrayList<TabNewsData> news = mTabData.data.news;
 			mTabNewsList.addAll(news);
 			mNewsAdapter.notifyDataSetChanged();
-			mTopNewsAdapter.notifyDataSetChanged(); //必须同时更新头布局！
+			mTopNewsAdapter.notifyDataSetChanged(); // 必须同时更新头布局！
 		}
 
 	}
