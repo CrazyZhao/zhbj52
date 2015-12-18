@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -26,6 +29,7 @@ import com.itheima.zhbj52.domain.TabData;
 import com.itheima.zhbj52.domain.TabData.TabNewsData;
 import com.itheima.zhbj52.domain.TabData.TopNewsData;
 import com.itheima.zhbj52.global.GlobalConstants;
+import com.itheima.zhbj52.utils.CacheUtils;
 import com.itheima.zhbj52.utils.PrefUtils;
 import com.itheima.zhbj52.view.RefreshListView;
 import com.itheima.zhbj52.view.RefreshListView.OnRefreshListener;
@@ -61,6 +65,8 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 	private NewsAdapter mNewsAdapter;
 	private String mMoreUrl; // 更多页面的地址
 	private TopNewsAdapter mTopNewsAdapter;
+
+	private Handler mHandler;
 
 	public TabDetailPager(Activity mActivity, NewsTabData newsTabData) {
 		super(mActivity);
@@ -136,7 +142,12 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 
 	@Override
 	public void initData() {
+		String cache = CacheUtils.getCache(mActivity, mUrl);
+		if (!TextUtils.isEmpty(cache)) {
+			parseData(cache, false);
+		}
 		getDataFromServer();
+
 	}
 
 	private void getDataFromServer() {
@@ -148,6 +159,8 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 				String result = responseInfo.result;
 				System.out.println("页签详情页返回结果：" + result);
 				parseData(result, false);
+				// 设置缓存
+				CacheUtils.setCache(mActivity, mUrl, result);
 				lvList.onRefreshComplete(true);
 			}
 
@@ -214,6 +227,22 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 				mNewsAdapter = new NewsAdapter();
 				lvList.setAdapter(mNewsAdapter); // 填充新闻列表
 			}
+			// 自动轮播条显示
+			if (mHandler == null) {
+				mHandler = new Handler() {
+					public void handleMessage(android.os.Message msg) {
+						int currentItem = mViewPager.getCurrentItem();
+						if (currentItem < mTopNewsList.size() - 1) {
+							currentItem++;
+						} else {
+							currentItem = 0;
+						}
+						mViewPager.setCurrentItem(currentItem);
+						mHandler.sendEmptyMessageDelayed(0, 3000);// 形成循环
+					};
+				};
+				mHandler.sendEmptyMessageDelayed(0, 3000); // 延时3秒发消息
+			}
 		} else { // 如果是加载下一页，需要将数据追加给原来的集合
 			ArrayList<TabNewsData> news = mTabData.data.news;
 			mTabNewsList.addAll(news);
@@ -253,6 +282,8 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 			TopNewsData topNewsData = mTopNewsList.get(position);
 			bitmapUtils.display(mImage, topNewsData.topimage); // 传入imageView对象和图片地址
 			container.addView(mImage);
+
+			mImage.setOnTouchListener(new TopNewsTouchListener());// 设置触摸监听
 			return mImage;
 		}
 
@@ -260,6 +291,35 @@ public class TabDetailPager extends BaseMenuDetailPager implements
 		public void destroyItem(ViewGroup container, int position, Object object) {
 			container.removeView((View) object);
 		}
+	}
+
+	/**
+	 * 头条新闻的触摸监听
+	 * 
+	 * @author baoliang.zhao
+	 * 
+	 */
+	class TopNewsTouchListener implements OnTouchListener {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				mHandler.removeCallbacksAndMessages(null); // 删除handler中的所有消息
+				break;
+			case MotionEvent.ACTION_UP:
+				mHandler.sendEmptyMessageDelayed(0, 3000); // 延时3秒发消息
+				break;
+			case MotionEvent.ACTION_CANCEL:
+				mHandler.sendEmptyMessageDelayed(0, 3000); // 延时3秒发消息
+				break;
+
+			default:
+				break;
+			}
+			return true;
+		}
+
 	}
 
 	/**

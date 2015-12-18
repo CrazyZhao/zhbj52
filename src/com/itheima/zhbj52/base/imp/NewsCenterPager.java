@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.app.Activity;
 import android.graphics.Color;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +20,7 @@ import com.itheima.zhbj52.base.menudetail.TopicMenuDetailPager;
 import com.itheima.zhbj52.domain.NewsData;
 import com.itheima.zhbj52.fragment.LeftMenuFragment;
 import com.itheima.zhbj52.global.GlobalConstants;
+import com.itheima.zhbj52.utils.CacheUtils;
 import com.itheima.zhbj52.utils.PrefUtils;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
@@ -53,8 +55,13 @@ public class NewsCenterPager extends BasePager {
 		// 向FrameLayout中动态添加布局
 		// subContent.addView(text);
 
-		getServerData();
-
+		String cache = CacheUtils.getCache(mActivity,
+				GlobalConstants.CATEGORIES_URL);
+		if (!TextUtils.isEmpty(cache)) {
+			parseData(cache);
+		}
+		getServerData(); //不管有没有缓存,都去获取最新数据
+		
 	}
 
 	/**
@@ -65,13 +72,16 @@ public class NewsCenterPager extends BasePager {
 		HttpUtils utils = new HttpUtils();
 		utils.send(HttpMethod.GET, GlobalConstants.CATEGORIES_URL,
 				new RequestCallBack<String>() {
-					//访问成功,在主线程中运行
+					// 访问成功,在主线程中运行
 					@Override
 					public void onSuccess(ResponseInfo<String> responseInfo) {
 						String result = responseInfo.result;
 						System.out.println("返回结果：" + result);
 
 						parseData(result);
+						// 设置缓存
+						CacheUtils.setCache(mActivity,
+								GlobalConstants.CATEGORIES_URL, result);
 
 					}
 
